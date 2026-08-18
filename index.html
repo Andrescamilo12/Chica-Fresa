@@ -277,13 +277,15 @@
         /* scroll hint arrow */
         .scroll-hint {
             text-align: center;
-            font-size: .75rem;
-            color: rgba(194, 24, 91, .5);
+            font-size: .82rem;
+            color: rgba(194, 24, 91, .85);
             letter-spacing: 2px;
-            height: 18px;
+            height: 20px;
             opacity: 0;
             transition: opacity .3s;
             flex-shrink: 0;
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(194, 24, 91, .4);
         }
 
         .page-text-wrap.has-more .scroll-hint {
@@ -481,6 +483,313 @@
             border-radius: 0 0 12px 0;
             pointer-events: none;
             z-index: 3;
+        }
+
+        /* ════════════════════════════════════════════════════
+           MOBILE SAFE MODE
+           • 100% 2D: evita artefactos GPU/3D en teléfonos
+           • Solo la página actual queda visible
+           • Sin pseudo-elementos rayados ni backdrop-filter
+           ════════════════════════════════════════════════════ */
+        @media (max-width: 640px) {
+
+            html {
+                width: 100%;
+                height: 100%;
+                background: #0d0005;
+            }
+
+            body {
+                width: 100%;
+                height: 100%;
+                min-height: 100dvh;
+                overflow: hidden !important;
+                background: #0d0005 !important;
+                display: block;
+                position: relative;
+            }
+
+            /* Desactivar elementos decorativos que pueden forzar composición GPU */
+            #petals {
+                display: none !important;
+            }
+
+            .title-bar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                padding: 10px 10px 8px;
+                background: #0d0005 !important;
+                z-index: 100;
+            }
+
+            .title-bar h1 {
+                font-size: 1.45rem;
+                line-height: 1.2;
+                text-shadow: none !important;
+                animation: none !important;
+            }
+
+            .title-bar p {
+                font-size: .72rem;
+                line-height: 1.35;
+                margin-top: 3px;
+            }
+
+            #footer-text {
+                font-size: .75rem;
+                bottom: 5px;
+                max-width: 80vw;
+                text-align: center;
+                left: 10vw;
+                right: 10vw;
+            }
+
+            /* Contenedor completamente plano */
+            #stage {
+                width: 100%;
+                height: 100dvh;
+                margin: 0 !important;
+                padding: 0;
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                perspective: none !important;
+                transform: none !important;
+                transform-style: flat !important;
+            }
+
+            #book {
+                width: 90vw;
+                height: 65dvh;
+                margin: 8vh 0 0;
+                position: relative;
+                background: transparent !important;
+                perspective: none !important;
+                transform: none !important;
+                transform-style: flat !important;
+                box-shadow: none !important;
+            }
+
+            /* Todas las páginas se mantienen planas y ocultas */
+            .page,
+            #cover-page {
+                display: none !important;
+                position: absolute !important;
+                inset: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                transform: none !important;
+                transform-style: flat !important;
+                transition: none !important;
+                perspective: none !important;
+                backface-visibility: visible !important;
+                -webkit-backface-visibility: visible !important;
+                box-shadow: none !important;
+            }
+
+            /* Solo la página actual */
+            .page.mobile-active,
+            #cover-page.mobile-active {
+                display: block !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+                pointer-events: auto !important;
+                z-index: 50 !important;
+                transform: none !important;
+                transform-style: flat !important;
+            }
+
+            /* Una sola cara, sin 3D */
+            .face {
+                position: absolute !important;
+                inset: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                display: flex !important;
+                transform: none !important;
+                transform-style: flat !important;
+                perspective: none !important;
+                backface-visibility: visible !important;
+                -webkit-backface-visibility: visible !important;
+                border-radius: 6px !important;
+                overflow: hidden !important;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, .3) !important;
+            }
+
+            /* La cara trasera jamás participa en móvil */
+            .face.back,
+            .cover-back {
+                display: none !important;
+                visibility: hidden !important;
+            }
+
+            /*
+             * IMPORTANTE:
+             * Se elimina el patrón repeating-linear-gradient que podía
+             * convertirse en rayas/artefactos en algunas GPUs móviles.
+             */
+            .face::before,
+            .face::after {
+                display: none !important;
+                content: none !important;
+                background: none !important;
+            }
+
+            .cover-front {
+                position: absolute !important;
+                inset: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                display: flex !important;
+                transform: none !important;
+                transform-style: flat !important;
+                perspective: none !important;
+                backface-visibility: visible !important;
+                -webkit-backface-visibility: visible !important;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, .5) !important;
+                border-radius: 6px !important;
+                padding: 30px 20px !important;
+                animation: none !important;
+            }
+
+            .page-inner {
+                width: 100%;
+                height: 100%;
+                min-height: 0;
+                padding: 18px 16px 14px !important;
+                overflow: hidden;
+            }
+
+            .page-title {
+                font-size: 1.15rem;
+                line-height: 1.25;
+                margin-bottom: 8px;
+            }
+
+            .page-text-wrap {
+                min-height: 0;
+                overflow: hidden;
+            }
+
+            .page-text {
+                font-size: .88rem;
+                line-height: 1.6;
+                overflow-y: auto !important;
+                -webkit-overflow-scrolling: touch;
+                overscroll-behavior: contain;
+                scrollbar-width: none;
+            }
+
+            .page-text::-webkit-scrollbar {
+                display: none;
+            }
+
+            /* El degradado inferior también se elimina en móvil */
+            .page-text-wrap::after {
+                display: none !important;
+                content: none !important;
+            }
+
+            .scroll-hint {
+                font-size: .95rem !important;
+                height: 28px !important;
+                line-height: 28px !important;
+                opacity: 1 !important;
+                color: #c2185b !important;
+                font-weight: 700 !important;
+                letter-spacing: 1.5px !important;
+                text-shadow: 0 1px 4px rgba(194, 24, 91, .25) !important;
+                animation: mobileScrollHint 1.4s ease-in-out infinite !important;
+            }
+
+            @keyframes mobileScrollHint {
+
+                0%,
+                100% {
+                    transform: translateY(0);
+                    opacity: .65;
+                }
+
+                50% {
+                    transform: translateY(4px);
+                    opacity: 1;
+                }
+            }
+
+            .page-ornament {
+                font-size: .9rem;
+                margin-top: 8px;
+            }
+
+            .cover-title {
+                font-size: 1.8rem;
+                line-height: 1.2;
+                text-shadow: none !important;
+            }
+
+            .cover-sub {
+                font-size: .85rem;
+                margin-top: 8px;
+            }
+
+            .cover-ornament {
+                font-size: 1.3rem;
+                margin-bottom: 10px;
+                animation: none !important;
+            }
+
+            .cover-divider {
+                width: 75%;
+                margin: 12px auto;
+            }
+
+            .cover-heart {
+                font-size: 1.6rem;
+                animation: none !important;
+            }
+
+            .cover-hint {
+                font-size: .68rem;
+                bottom: 15px;
+            }
+
+            /* Botones: sin blur/backdrop-filter */
+            .nav-btn {
+                width: 44px;
+                height: 44px;
+                font-size: 1.5rem;
+                border-radius: 50%;
+                background: rgba(194, 24, 91, .85) !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                bottom: 30px;
+                top: auto;
+                transform: none !important;
+                transition: none !important;
+                border: 2px solid rgba(255, 255, 255, .2) !important;
+                box-shadow: none !important;
+            }
+
+            .nav-btn:hover {
+                transform: none !important;
+            }
+
+            #btn-prev {
+                left: 15vw;
+            }
+
+            #btn-next {
+                right: 15vw;
+            }
+
+            #page-indicator {
+                bottom: 42px;
+                font-size: .9rem;
+            }
         }
     </style>
 </head>
@@ -833,13 +1142,48 @@ Siempre te elegiré a ti.`
         }
         setTimeout(initScrollHints, 150);
 
+        // On mobile, show the "desliza" hint whenever a page has more text.
+        function updateMobileScrollHints() {
+            if (!window.matchMedia('(max-width: 640px)').matches) return;
+            PAGES.forEach((_, i) => {
+                const pt = document.getElementById(`pt-${i}`);
+                const wrap = document.getElementById(`wrap-${i}`);
+                if (!pt || !wrap) return;
+                wrap.classList.toggle('has-more', pt.scrollHeight > pt.clientHeight + 4);
+            });
+        }
+
+        window.addEventListener('resize', updateMobileScrollHints);
+
+
         let currentPage = 0; // 0 = cover visible
 
+        const isMobile = () => window.matchMedia('(max-width: 640px)').matches;
 
         function updateUI() {
             const total = pageEls.length - 1;
             document.getElementById('btn-prev').disabled = currentPage === 0;
             document.getElementById('btn-next').disabled = currentPage >= total;
+
+            // Mobile: show exactly one page and do NOT depend on CSS 3D transitions.
+            if (isMobile()) {
+                pageEls.forEach((el, idx) => {
+                    el.classList.toggle('mobile-active', idx === currentPage);
+                    el.style.zIndex = idx === currentPage ? '50' : '0';
+                    el.style.display = idx === currentPage ? 'block' : 'none';
+                    el.style.transform = 'none';
+                });
+                return;
+            }
+
+            // Desktop: original stacked-book behavior.
+            pageEls.forEach((el, idx) => {
+                if (idx === currentPage) {
+                    el.classList.add('mobile-active');
+                } else {
+                    el.classList.remove('mobile-active');
+                }
+            });
         }
 
         function setZIndexes() {
@@ -860,9 +1204,22 @@ Siempre te elegiré a ti.`
 
         function flipNext() {
             if (currentPage >= pageEls.length - 1 || isAnimating) return;
+
+            // Mobile: direct page switch, no transitionend required.
+            if (isMobile()) {
+                currentPage++;
+                updateUI();
+
+                // Reset the scroll position of the newly opened page.
+                const pt = document.getElementById(`pt-${currentPage - 1}`);
+                if (pt) pt.scrollTop = 0;
+                setTimeout(updateMobileScrollHints, 50);
+                return;
+            }
+
             isAnimating = true;
             const el = pageEls[currentPage];
-            el.style.zIndex = 9999; // Pin on top for entire animation
+            el.style.zIndex = 9999;
             el.classList.add('flipped');
             currentPage++;
             updateUI();
@@ -875,10 +1232,22 @@ Siempre te elegiré a ti.`
 
         function flipPrev() {
             if (currentPage <= 0 || isAnimating) return;
+
+            // Mobile: direct page switch, no transitionend required.
+            if (isMobile()) {
+                currentPage--;
+                updateUI();
+
+                const pt = document.getElementById(`pt-${currentPage - 1}`);
+                if (pt) pt.scrollTop = 0;
+                setTimeout(updateMobileScrollHints, 50);
+                return;
+            }
+
             isAnimating = true;
             currentPage--;
             const el = pageEls[currentPage];
-            el.style.zIndex = 9999; // Pin on top for entire animation
+            el.style.zIndex = 9999;
             el.classList.remove('flipped');
             updateUI();
             el.addEventListener('transitionend', function handler() {
@@ -898,6 +1267,13 @@ Siempre te elegiré a ti.`
         // Initialize: cover on top, buttons correct
         setZIndexes();
         updateUI();
+        setTimeout(updateMobileScrollHints, 250);
+
+        // Keep the correct rendering mode after rotating/resizing the phone.
+        window.addEventListener('resize', () => {
+            setZIndexes();
+            updateUI();
+        });
     </script>
 </body>
 
