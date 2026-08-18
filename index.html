@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mi Chica Fresa 🍓❤️</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Dancing+Script:wght@500;700&family=Lato:wght@300;400&display=swap"
+        rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --rose: #c2185b;
+            --gold: #c9a84c;
+            --parchment: #f5ead9;
+            --parchment2: #ede0c8;
+            --ink: #3b2a1a;
+            --spine: #8b1a3a;
+        }
+
+        body {
+            background: radial-gradient(ellipse at top, #1a0a0f 0%, #0d0005 70%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Lato', sans-serif;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* ── floating petals ── */
+        .petals-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .petal {
+            position: absolute;
+            border-radius: 50% 0 50% 0;
+            opacity: 0;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-20px) rotate(0deg);
+                opacity: .65;
+            }
+
+            100% {
+                transform: translateY(110vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* ── title bar ── */
+        .title-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            padding: 14px 20px 10px;
+            z-index: 10;
+            background: linear-gradient(to bottom, rgba(13, 0, 5, .95), transparent);
+        }
+
+        .title-bar h1 {
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(1.6rem, 5vw, 2.6rem);
+            color: #fff;
+            text-shadow: 0 0 30px #c2185b, 0 0 60px #c2185b55;
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 20px #c2185b, 0 0 40px #c2185b55;
+            }
+
+            to {
+                text-shadow: 0 0 40px #ff4d94, 0 0 80px #ff4d9455;
+            }
+        }
+
+        .title-bar p {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: .85rem;
+            color: #f8bbd099;
+            margin-top: 4px;
+        }
+
+        /* ── book stage ── */
+        #stage {
+            perspective: 2000px;
+            position: relative;
+            z-index: 1;
+            margin-top: 10px;
+        }
+
+        /* ── book shell ── */
+        #book {
+            width: min(92vw, 680px);
+            height: min(72vh, 520px);
+            position: relative;
+        }
+
+        /* ── each page ── */
+        .page {
+            position: absolute;
+            inset: 0;
+            transform-origin: left center;
+            transform-style: preserve-3d;
+            transition: transform .8s cubic-bezier(.645, .045, .355, 1);
+            cursor: pointer;
+        }
+
+        .page.flipped {
+            transform: rotateY(-180deg);
+        }
+
+        /* front / back faces */
+        .face {
+            position: absolute;
+            inset: 0;
+            backface-visibility: hidden;
+            border-radius: 4px 12px 12px 4px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .face.back {
+            transform: rotateY(180deg);
+            border-radius: 12px 4px 4px 12px;
+        }
+
+        /* parchment surface */
+        .face {
+            background: var(--parchment);
+            box-shadow:
+                -4px 0 14px rgba(0, 0, 0, .5),
+                6px 6px 32px rgba(0, 0, 0, .55),
+                inset 8px 0 22px rgba(139, 90, 43, .1);
+        }
+
+        .face.back {
+            background: var(--parchment2);
+            box-shadow:
+                4px 0 14px rgba(0, 0, 0, .5),
+                -6px 6px 32px rgba(0, 0, 0, .45),
+                inset -8px 0 22px rgba(139, 90, 43, .1);
+        }
+
+        /* lined paper */
+        .face::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: repeating-linear-gradient(to bottom,
+                    transparent 0px, transparent 37px,
+                    #d4a57430 37px, #d4a57430 38px);
+            pointer-events: none;
+        }
+
+        /* spine line */
+        .face::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 26px;
+            background: linear-gradient(to right, rgba(201, 168, 76, .2), transparent);
+            border-right: 2px solid rgba(201, 168, 76, .4);
+            z-index: 1;
+        }
+
+        .face.back::before {
+            left: auto;
+            right: 0;
+            background: linear-gradient(to left, rgba(201, 168, 76, .2), transparent);
+            border-right: none;
+            border-left: 2px solid rgba(201, 168, 76, .4);
+        }
+
+        /* page content */
+        .page-inner {
+            flex: 1;
+            padding: 36px 42px 30px 54px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 2;
+        }
+
+        .face.back .page-inner {
+            padding: 36px 54px 30px 42px;
+        }
+
+        .page-num {
+            font-family: 'Playfair Display', serif;
+            font-size: .72rem;
+            color: var(--gold);
+            text-align: center;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        .page-title {
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(1.3rem, 3vw, 1.8rem);
+            color: var(--rose);
+            margin-bottom: 14px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(194, 24, 91, .25);
+        }
+
+        .page-text-wrap {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-text {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(.88rem, 1.8vw, 1rem);
+            line-height: 1.85;
+            color: var(--ink);
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 6px;
+            /* hide scrollbar visually */
+            scrollbar-width: none;
+        }
+
+        .page-text::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* fade at bottom when more text below */
+        .page-text-wrap::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 48px;
+            background: linear-gradient(to bottom, transparent, var(--parchment));
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity .3s;
+        }
+
+        .page-text-wrap.has-more::after {
+            opacity: 1;
+        }
+
+        /* scroll hint arrow */
+        .scroll-hint {
+            text-align: center;
+            font-size: .75rem;
+            color: rgba(194, 24, 91, .5);
+            letter-spacing: 2px;
+            height: 18px;
+            opacity: 0;
+            transition: opacity .3s;
+            flex-shrink: 0;
+        }
+
+        .page-text-wrap.has-more .scroll-hint {
+            opacity: 1;
+        }
+
+        .page-ornament {
+            text-align: center;
+            font-size: 1rem;
+            color: rgba(194, 24, 91, .5);
+            letter-spacing: 6px;
+            margin-top: 14px;
+        }
+
+        /* ── COVER ── */
+        #cover-page {
+            position: absolute;
+            inset: 0;
+            z-index: 20;
+            transform-origin: left center;
+            transform-style: preserve-3d;
+            transition: transform .9s cubic-bezier(.645, .045, .355, 1);
+            cursor: pointer;
+        }
+
+        #cover-page.flipped {
+            transform: rotateY(-180deg);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .cover-front {
+            position: absolute;
+            inset: 0;
+            backface-visibility: hidden;
+            background: linear-gradient(160deg, #5a0028 0%, #1e0010 50%, #4a001e 100%);
+            border-radius: 4px 14px 14px 4px;
+            border: 1px solid rgba(201, 168, 76, .3);
+            box-shadow:
+                -6px 0 20px rgba(0, 0, 0, .7),
+                14px 14px 50px rgba(0, 0, 0, .8),
+                inset 0 0 80px rgba(194, 24, 91, .07);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 50px;
+            text-align: center;
+        }
+
+        .cover-back {
+            position: absolute;
+            inset: 0;
+            backface-visibility: hidden;
+            transform: rotateY(180deg);
+            background: var(--parchment2);
+            border-radius: 14px 4px 4px 14px;
+            box-shadow: 4px 0 14px rgba(0, 0, 0, .5);
+        }
+
+        .cover-ornament {
+            font-size: 2rem;
+            color: var(--gold);
+            letter-spacing: 10px;
+            margin-bottom: 18px;
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+
+        .cover-divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--gold), transparent);
+            width: 75%;
+            margin: 16px auto;
+        }
+
+        .cover-title {
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(2rem, 6vw, 3.2rem);
+            color: #fff;
+            text-shadow: 0 0 30px rgba(194, 24, 91, .6);
+            line-height: 1.2;
+        }
+
+        .cover-sub {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            color: #f8bbd0cc;
+            font-size: 1rem;
+            margin-top: 10px;
+        }
+
+        .cover-hint {
+            position: absolute;
+            bottom: 20px;
+            font-family: 'Lato', sans-serif;
+            font-size: .78rem;
+            color: rgba(255, 255, 255, .3);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .cover-heart {
+            font-size: 2.2rem;
+            margin-top: 20px;
+            display: inline-block;
+            animation: heartbeat 1.4s ease-in-out infinite;
+        }
+
+        @keyframes heartbeat {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            14% {
+                transform: scale(1.18);
+            }
+
+            28% {
+                transform: scale(1);
+            }
+
+            42% {
+                transform: scale(1.1);
+            }
+        }
+
+        /* ── navigation arrows ── */
+        .nav-btn {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 30;
+            background: rgba(194, 24, 91, .18);
+            border: 1px solid rgba(194, 24, 91, .4);
+            color: #f8bbd0;
+            font-size: 1.8rem;
+            width: 48px;
+            height: 80px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background .2s, transform .2s;
+            backdrop-filter: blur(4px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(194, 24, 91, .4);
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .nav-btn:disabled {
+            opacity: .2;
+            cursor: default;
+        }
+
+        #btn-prev {
+            left: clamp(6px, 2vw, 30px);
+        }
+
+        #btn-next {
+            right: clamp(6px, 2vw, 30px);
+        }
+
+        /* ── page counter ── */
+        #page-indicator {
+            position: fixed;
+            bottom: 28px;
+            font-family: 'Playfair Display', serif;
+            font-size: .85rem;
+            color: #f8bbd077;
+            letter-spacing: 2px;
+            z-index: 10;
+        }
+
+        /* ── footer ── */
+        #footer-text {
+            position: fixed;
+            bottom: 8px;
+            font-family: 'Dancing Script', cursive;
+            font-size: .95rem;
+            color: rgba(248, 187, 208, .4);
+            z-index: 10;
+        }
+
+        /* ── page-curl shadow hint on right edge ── */
+        .page-curl {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, transparent 50%, rgba(0, 0, 0, .12) 50%);
+            border-radius: 0 0 12px 0;
+            pointer-events: none;
+            z-index: 3;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="petals-bg" id="petals"></div>
+
+    <!-- Title -->
+    <div class="title-bar">
+        <h1>🍓 Mi Chica Fresa</h1>
+        <p>Te amo hasta el infinito y más allá, a pasitos de tortuga en tacones de hielo caminando sobre fuego 🐢❤️🔥
+        </p>
+    </div>
+
+    <!-- Navigation -->
+    <button class="nav-btn" id="btn-prev" onclick="flipPrev()" disabled>&#8249;</button>
+    <button class="nav-btn" id="btn-next" onclick="flipNext()">&#8250;</button>
+
+    <!-- Book -->
+    <div id="stage">
+        <div id="book">
+            <!-- Cover -->
+            <div id="cover-page" onclick="flipNext()">
+                <div class="cover-front">
+                    <div class="cover-ornament">✦ ❦ ✦</div>
+                    <div class="cover-divider"></div>
+                    <div class="cover-title">Mi Chica Fresa</div>
+                    <div class="cover-sub">Para ti, con todo mi amor</div>
+                    <div class="cover-heart">❤️</div>
+                    <div class="cover-divider"></div>
+                    <div class="cover-hint">Toca para abrir ›</div>
+                </div>
+                <div class="cover-back"></div>
+            </div>
+            <!-- Pages injected by JS -->
+        </div>
+    </div>
+
+
+    <!-- Footer -->
+    <div id="footer-text">Tú y yo, yo y tú, rodeando la montaña ❤ ❤ ❤</div>
+
+    <script>
+        // ─────────────────────────────────────────────
+        //  TEXTS — agrega aquí los textos de amor
+        //  Cada objeto es UNA página. Si el texto es largo
+        //  se recortará automáticamente; agrega más páginas.
+        // ─────────────────────────────────────────────
+        const PAGES = [
+            {
+                title: "Lo que siento por ti",
+                text: `Me encuentro aquí escribiéndote estas palabras llenas de amor y sinceridad, porque necesito que sepas lo profundo que es mi sentimiento hacia ti.
+
+No puedo evitar pensar en todo lo que compartimos, en todas las risas, en cada abrazo y en cada mirada que nos hemos dado. Eres el amor de mi vida, mi razón de ser.
+
+Desde el momento en que te vi supe que eras alguien especial. Tus ojos reflejaban ternura y amabilidad, y tu sonrisa iluminaba mi mundo por completo. No puedo imaginar mi vida sin ti, porque sería como vivir en un constante vacío, sin alegría ni ilusión.
+
+Eres quien me ha enseñado a amar de verdad, quien me ha mostrado que el amor puede ser puro y verdadero. Cada día contigo es un regalo y agradezco a la vida por haberte puesto en mi camino.
+
+Tu compañía me llena de felicidad y calma en los momentos más difíciles.`
+            },
+            {
+                title: "Mi promesa para siempre",
+                text: `No quiero perderte, mi amor. Eres el centro de mi universo, mi confidente y mi cómplice. Eres mi refugio en los días nublados y mi motor en los días soleados. Quiero compartir a tu lado cada instante de nuestras vidas y construir juntos un futuro lleno de amor.
+
+Prometo cuidar de nuestro amor y de nuestra relación, porque eres lo más valioso que tengo en mi vida. No importan las adversidades que encontremos en el camino, juntos podemos superar cualquier obstáculo. Me comprometo a ser tu compañero fiel, a apoyarte en tus sueños y a celebrar tus logros como si fueran los míos.
+
+No quiero perderte, porque eres mi hogar, mi paz y mi felicidad. Sin importar las dificultades que se presenten, siempre estaré aquí, poniendo todo de mi parte para que nuestro amor florezca y perdure en el tiempo.
+
+Te amo más de lo que las palabras pueden expresar y deseo que nunca olvides cuánto te valoro y te admiro. Estoy dispuesto a luchar por nuestro amor, a aprender de nuestros errores y a crecer como personas a tu lado.
+
+Gracias por ser el amor de mi vida, por enseñarme el verdadero significado del amor y por ser el mayor regalo que he recibido. No quiero perderte — nunca podré amar a nadie como te amo a ti. ❤️`
+            },
+            {
+                title: "En esta y mil vidas más",
+                text: `Quiero que te grabes muy bien en esa cabecita lo mucho que me importas y lo mucho que te amo, y que eso nunca va a cambiar, al menos hasta donde tú me permitas, porque de verdad quiero estar toda una vida contigo.
+
+Sé que tú eres a quien quiero siempre, así hasta hacernos viejitos juntos y poder decir que nuestro amor fue muy fuerte hasta el último momento en el que respiramos.
+
+Te amo hoy y siempre. Ten en cuenta que siempre te apoyaré y estaré orgulloso de cada uno de tus logros, siempre te voy a admirar por la persona que eres y el cómo mejoras día con día.
+
+Me encantas el corazón solo con mirarme y me enloqueces con esa sonrisa que tienes. Solo quédate conmigo y demostremos que sí se puede estar con alguien muchos años, y que por más que haya pasado el tiempo, este amor que nos tenemos siempre se mantuvo fuerte.
+
+Hasta que mi cuerpo no aguante o hasta que mi corazón ya no late — pero sé que en esta y mil vidas más, siempre te elegiría a ti antes que a otra persona.
+
+Te amo. ❤️`
+            },
+            {
+                title: "Si al final de todo...",
+                text: `No sé qué tenga preparado la vida, ni cuántos caminos tendremos que recorrer.
+Pero si al final de todos ellos termino encontrándote a ti, creo que todo habrá valido la pena. 
+
+No necesito una historia perfecta, ni promesas que duren eternamente. Solo quiero algo sencillo: despertar una mañana y encontrarte a mi lado, mirarte todavía con sueño y pensar que tuve suerte de coincidir contigo. 
+
+Quiero compartir contigo los días buenos, pero también esos días en los que nada parece salir bien. Quiero conocer tus silencios, tus manías, tus sueños y hasta aquello que intentas esconder. Porque amarte no sería querer solamente tu parte bonita. Sería elegirte completa. 
+
+Y si algún día me preguntas qué es lo que realmente quiero de esta vida, no tendría una respuesta complicada. Solo diría: quiero una vida que tenga tu nombre.
+
+Y si eres tú... no necesito pedirle nada más al destino.`
+            },
+            {
+                title: "Un temor silencioso",
+                text: `En ocasiones, me invade un temor silencioso, de esos miedos sutiles e invisibles que no hacen ruido pero lo llenan todo, como una niebla espesa que envuelve cada pensamiento. Es el temor profundo y persistente de perderte, de enfrentar un día en el que ya no estés a mi lado, de que lo que hoy siento tan real y tangible se convierta en un recuerdo distante y doloroso, uno que duela demasiado mirar.
+
+No es un miedo lógico ni fácil de explicar con palabras, porque surge precisamente de lo mucho que significas para mí, de la importancia que has cobrado en mi vida. Me asusta sobremanera pensar que todo lo que hemos construido juntos, cada conversación que hemos sostenido, cada risa compartida, cada momento que hemos atesorado, pueda desvanecerse con el paso inexorable del tiempo o debido a circunstancias imprevistas que no podamos controlar.
+
+Me aterra imaginar un futuro en el que tenga que acostumbrarme a tu ausencia, en el que ya no pueda recurrir a ti para compartir mis alegrías y penas, en el que tu voz, que tanto me reconforta, ya no sea parte de mis días.`
+            },
+            {
+                title: "El miedo a perderte",
+                text: `A veces, en mis intentos por ser racional, trato de convencerme de que no debería sentir esto, de que debería vivir plenamente el presente sin dejar que la angustia por lo que aún no ha pasado me consuma. Pero es complicado mantener esa perspectiva cuando alguien se vuelve tan crucial para uno mismo, cuando ocupa un lugar tan profundo y significativo dentro de ti.
+
+Porque entonces ya no se trata solo de disfrutar el momento, sino también de proteger, de cuidar, de aferrarse a lo que tenemos, de no querer que nada cambie. Tengo miedo de no ser suficiente, de que en algún momento algo vaya mal, de que el destino caprichoso o las decisiones difíciles nos lleven por caminos distintos.
+
+Y ese pensamiento pesa en mi corazón, porque no quiero ni puedo imaginar mi vida sin ti en ella. No quiero que te conviertas en alguien que "alguna vez estuvo", alguien que quede relegado al pasado.`
+            },
+            {
+                title: "Eligiendo quererte",
+                text: `Sin embargo, en medio de todo ese miedo constante, también hay algo profundamente hermoso: significa que realmente me importas, que lo que siento es genuino y verdadero, que no eres simplemente una persona más en mi vida. Eres alguien especial, alguien que llegó inesperadamente a mi vida y logró quedarse en un lugar donde pocos realmente llegan. 
+
+Quizás no pueda evitar sentir este miedo por completo, quizás sea algo que siempre me acompañe, pero sí puedo intentar que no me paralice, que no me impida vivir. Puedo elegir seguir aquí, valorarte cada día, demostrarte lo importante que eres para mí mientras tenga la oportunidad de hacerlo. 
+
+Porque si algo tengo claro y seguro, es que prefiero sentir este miedo, que aunque inquietante, es prueba de mi amor, antes que no sentir nada en absoluto. Y si algún día llega el temido momento en que tenga que soltarte, espero al menos haber hecho todo lo posible para que supieras cuánto significabas para mí, cuánto marcaste mi vida. 
+
+Mientras tanto, aquí estoy, con este miedo que me acompaña, y con todo lo que siento, cada día eligiendo quererte a pesar de todo.`
+            },
+            {
+                title: "En esta vida",
+                text: `No quiero encontrarte en otra vida. No quiero que nos crucemos en un universo distinto, en otro tiempo, o cuando ya sea demasiado tarde.
+
+No quiero que seas ese amor que se fue. No quiero que te conviertas en mi "qué hubiera pasado" o en mi persona correcta en el momento equivocado. No quiero pasar mi vida buscando algo que se parezca a ti.
+
+No quiero empezar de nuevo con alguien más, volver a contar mi historia, volver a abrir mi corazón desde cero. No quiero volver a amar a nadie más. Yo quiero arreglar esto contigo.
+
+Quiero que mi futuro sea contigo. Quiero que mis días tengan tu nombre, que mis años te pertenezcan. Quiero pelear contigo y después abrazarte fuerte.`
+            },
+            {
+                title: "Tú y yo",
+                text: `Quiero compartir momentos simples: ir al súper, ver una película, construir una vida juntos. Quiero soñar a lo grande y cumplirlo todo contigo.
+
+Porque no sé si hay otra vida, no sé si el destino nos dará otra oportunidad. Pero esta sí la tengo.
+
+Y con todo mi corazón... quiero que seamos tú y yo en esta vida.`
+            },
+            {
+                title: "Lucharé por ti",
+                text: `Lucharé por ti aunque nadie lo entienda, aunque muchos me digan que lo suelte, que siga adelante, que hay otras personas o caminos. Pero esas personas no conocen lo que yo siento por ti. No vivieron lo que yo viví contigo, no saben lo que significó mirarte a los ojos y sentir que, por fin, algo en este mundo tenía sentido.
+
+Tal vez para los demás esto parezca exagerado, irracional, intenso... pero para mí es simplemente verdad. Una verdad que no puedo ignorar por más que lo intente.
+
+A veces me sorprendo a mí mismo imaginando cómo serían nuestros días si estuvieras aquí, si volviéramos a empezar, si todo fuera distinto. Pero no me quedo en la fantasía: trabajo todos los días en ser mejor, en crecer, en sanar, en merecerte de nuevo, aunque tú ya no estés viendo...`
+            },
+            {
+                title: "Parte de mí",
+                text: `Te convertiste en parte de mi identidad sin querer. Y eso no lo digo con tristeza ni como una carga, sino con gratitud, porque gracias a ti descubrí muchas cosas de mí que antes no conocía. Supe lo que era cuidar de alguien más con verdadera entrega, lo que era preocuparme por cada mínimo detalle, por cada gesto, por cada emoción que pasaba por tu rostro...
+
+Aprendí lo que era querer estar para alguien no solo en los momentos bonitos, sino también en los más difíciles, esos que nadie quiere ver ni afrontar.
+
+Te quise en todos tus estados, en todas tus versiones, en tus días buenos y en los que querías desaparecer. Te quise siempre. Y lo sigo haciendo, aunque sea desde otro lugar...`
+            },
+            {
+                title: "Sigo eligiendo amarte",
+                text: `Me niego a pensar que todo fue en vano. No puedo creer que tanto amor se pierda así como así. Quizás sí, las cosas ya no serán como antes, pero lo que sentí, lo que siento, sigue siendo completamente real...
+
+Por eso, aunque duela, aunque muchas veces me quede solo con el recuerdo, sigo eligiendo amarte. Porque amar también es aceptar, también es soltar cuando hace falta, también es respetar tus tiempos y tus decisiones. Pero nada de eso borra lo que provocaste en mí. Nada lo disminuye. Nadie lo reemplaza..
+
+Y sí, hay noches en las que la soledad se vuelve insoportable. Momentos en los que miro el celular esperando un mensaje que no llega. A veces quisiera poder hablarte sin miedo, decirte todo esto de frente. Pero también entiendo que hay procesos que deben vivirse en silencio. Y si este es uno de esos, lo acepto, aunque duela.`
+            },
+            {
+                title: "Amar sin condiciones",
+                text: `Por eso, si algún día decides marcharte del todo, quiero que te vayas sabiendo esto: te amé de verdad. Como pocas veces en la vida se ama. Con errores, con imperfecciones, pero también con la certeza de haberlo dado todo... Sin guardar nada. Y aunque el final no sea el que imaginé, yo seguiré con el alma tranquila, porque hice lo que mi corazón me pedía: amar sin condiciones, amar hasta el final...
+
+Y pase lo que pase, si alguna vez necesitas volver, si un día sientes que quieres mirar atrás y saber que alguien te sigue esperando con amor, aquí estaré. No por debilidad, sino porque el amor verdadero no desaparece con el tiempo: se transforma, pero permanece.
+
+Te lo dije antes y te lo repito ahora: siempre estaré para ti. Porque solo te amo a ti, ya nadie más.`
+            },
+            {
+                title: "Con el corazón abierto",
+                text: `Hoy sentí la necesidad de escribirte, no con grandes palabras, sino con el corazón completamente abierto. A veces el amor se escapa en miradas, en silencios compartidos, en gestos pequeños que no siempre se dicen en voz alta. Hoy quiero que lo escuches con letras, que lo sientas en cada línea.
+
+No sé si alguna vez he logrado expresarte del todo lo que significas para mí. Lo intento con abrazos, con sonrisas, con cada “cuídate” que digo cuando te vas, pero también con cada pensamiento que tengo cuando no estás. Estás presente en mi vida como un hilo suave que me envuelve y me sostiene incluso en mis días más frágiles.
+
+Hay momentos contigo que guardo como un refugio. No son grandes eventos, no. Son esos instantes simples: cuando me miras sin decir nada y siento que me entiendes más que yo mismo...`
+            },
+            {
+                title: "Te amo por lo que eres",
+                text: `...cuando tu voz calma el ruido del mundo, o cuando me haces reír hasta que olvido todo lo que pesa. Eso es amor. Lo que tú me das, lo que creamos juntos sin esfuerzo, solo siendo.
+
+Te amo por lo que eres, pero también por cómo me haces sentir siendo yo. Me has enseñado que está bien ser vulnerable, llorar, abrir heridas, sanar despacito. Me has amado en mis días oscuros, y eso… eso no se olvida. Eso se honra.
+
+Gracias por existir, por quedarte, por mirar mi alma con ternura. Gracias por no soltarte de mi mano cuando todo tiembla. No hay día que no me sienta afortunado por tenerte, por compartir contigo este pequeño universo que construimos cada día.`
+            },
+            {
+                title: "Mi parte favorita del tiempo",
+                text: `Si alguna vez dudas, si alguna vez el mundo se vuelve demasiado, recuerda esto: te amo. Con una dulzura inmensa, con una ternura que a veces me desborda, con una fidelidad que nace del alma. Eres hogar, eres paz, eres mi parte favorita del tiempo.
+
+Con todo mi amor...`
+            },
+            {
+                title: "Incluso desde lejos",
+                text: `A veces quisiera tenerte aquí... poder abrazarte cuando extraño tu voz, mirarte a los ojos mientras te cuento cómo estuvo mi día, o simplemente sentir tu mano junto a la mía. Pero aunque la distancia nos separe por kilómetros, jamás ha podido separar lo que siento por ti.
+
+Porque amar a distancia no es fácil... hay noches de ansiedad, silencios que duelen, y momentos donde solo quisiera correr hacia ti. Pero aun así, aquí sigo... eligiéndote todos los días, incluso desde lejos.`
+            },
+            {
+                title: "Lugar seguro",
+                text: `Y es que contigo entendí que el amor verdadero no siempre se trata de estar cerca físicamente... sino de quedarse, de luchar, de confiar y de seguir construyendo sueños juntos aunque el mundo parezca difícil. 
+
+Tú te has convertido en mi lugar seguro, en esa persona que calma mis tormentas incluso estando lejos. Y aunque no pueda darte un beso cada noche, te doy algo más valioso: mi lealtad, mis ganas de seguir contigo y este amor inmenso que no deja de crecer. 
+
+Dicen que la distancia enfría los sentimientos... pero contigo pasó todo lo contrario. Mientras más lejos estás, más me doy cuenta de cuánto te amo y de todo lo que haría por verte sonreír.`
+            },
+            {
+                title: "Sin pantallas ni despedidas",
+                text: `Y sí... habrá días difíciles. Pero también habrá un día donde ya no existan pantallas ni despedidas, donde por fin podamos abrazarnos sin miedo al tiempo. Y cuando llegue ese momento, entenderemos que toda esta espera valió la pena.
+
+Porque tú... eres mi casualidad favorita, mi persona especial, y el amor que quiero en mi vida aun cuando el camino se pone difícil.
+
+Te amo hoy, mañana y en cada kilómetro que nos separa.`
+            },
+            {
+                title: "En mis palabras",
+                text: `No sé si esperabas esto, pero siento que necesito hablarte, aunque sea desde aquí, desde mis palabras. Estos días sin ti han sido un torbellino de emociones, no dejo de pensar en ti, en nosotros, en lo que teníamos y en lo que aún podríamos construir. Me pregunto cómo estás, si has estado bien, si has comido, si te cuidas como me gusta imaginar, porque aunque ya no estemos como antes, sigues siendo la persona que más me importa en este mundo.
+
+Sé que probablemente pienses que estoy insistiendo demasiado, pero, ¿cómo no voy a insistir cuando alguien ama con todo su corazón? No quiero que creas que no soy consciente de mis errores, porque lo soy, sé que fallé, sé que te decepcioné en momentos donde más necesitabas que te cuidara, pero también sé que ambos cometimos errores... y creo, desde lo más profundo de mí, que eso no significa que debamos rendirnos, porque lo que teníamos era real, lo que sentimos no era cualquier cosa, y no quiero dejarlo ir.`
+            },
+            {
+                title: "No quiero rendirme",
+                text: `Estos días han sido difíciles, me he sentido perdido, como si una parte de mí se hubiera quedado en silencio, y no puedo evitar pensar en nosotros, en las promesas que nos hicimos, en las palabras que me decías: "Nunca te dejaré", "Nunca me dejes tú", y me aferro a ellas porque en su momento significaron todo para mí, y aún lo significan. Porque yo no quiero dejarte, no quiero que esto termine así.
+
+Sé que probablemente tengas dudas, sé que puede que ya no sientas lo mismo, y eso me duele, duele más de lo que las palabras pueden explicar, pero aquí estoy, con el corazón en la mano, pidiéndote una oportunidad, porque creo que podemos salvar esto, creo que aún hay algo por lo que luchar, algo que vale la pena, porque aunque tuvimos momentos difíciles, también tuvimos momentos hermosos, y esos no los cambiaría por nada.`
+            },
+            {
+                title: "Aún hay un camino",
+                text: `Extraño tantas cosas de ti, extraño tu risa, tu mirada, incluso tus enojos, porque al final siempre encontrábamos la manera de reconciliarnos, siempre supimos que valía la pena. Y quiero que lo sigamos haciendo, que sigamos apostando por esto que teníamos, por esto que todavía siento, aunque no sé cómo te sientes tú ahora, yo sigo aquí, firme, con el corazón lleno de amor por ti.
+
+Espero que podamos hablar, que podamos escucharnos, sin culpas, sin reproches, solo con el deseo de entendernos, de ver si aún hay un camino juntos, porque yo no quiero rendirme, no quiero perderte. Y si me das una oportunidad, prometo dar todo de mí para que esto funcione, para que podamos volver a ser felices, porque todavía creo en nosotros, porque todavía te amo.`
+            },
+            {
+                title: "Caminar conmigo",
+                text: `Te invito a caminar conmigo. De la mano, los dos. Sin saber exactamente hacia dónde, pero sabiendo que quiero que sea contigo. Tal vez a un lugar lejano, uno de esos donde nadie nos diga cuándo termina el camino. 
+
+Tú y yo, en una pequeña casita en algún lugar tranquilo, una ventana donde podamos ver caer la tarde y nosotros riéndonos de cualquier tontería mientras el cielo cambia de color.`
+            },
+            {
+                title: "Momentos simples",
+                text: `Después, una cena sencilla, la luna acompañándonos desde arriba y nosotros hablando de todo y de nada... Y cuando llegue el sueño, prometernos algo tan sencillo como seguir encontrándonos al día siguiente. 
+
+Porque mañana habrá otro amanecer, otro café, otra caminata. Otra noche contigo, otro momento en el que pueda mirarte y pensar que tuve suerte de encontrarte. 
+
+Y así, sin darnos cuenta, ir llenando los días de pequeños momentos que algún día terminaremos llamando recuerdos.`
+            },
+            {
+                title: "Un día más",
+                text: `Quizás eso sea la felicidad: no necesitar que pase algo extraordinario, solo tener a la persona correcta para convertir lo cotidiano en algo que quieras recordar. Porque si es contigo, un día no sería suficiente. Ni una semana. Ni un mes.
+
+Ni siquiera todos esos pequeños momentos que podríamos guardar como luciérnagas para encender las noches que vengan después. 
+
+Creo que aun así me quedaría con ganas de un día más. Uno más para caminar contigo. Uno más para verte sonreír. Uno más para volver a casa juntos.`
+            },
+            {
+                title: "A nosotros",
+                text: `Así que no te prometo un destino perfecto. Solo quiero invitarte a caminar conmigo, sin saber exactamente dónde termina el camino.
+
+Y si algún día llegamos a un lugar donde ya no haya que seguir buscando, ojalá nos demos cuenta de que siempre estuvimos llegando al mismo lugar: a nosotros. 
+
+Entonces dime… ¿Caminarías conmigo hacia un destino donde el tiempo no tenga que terminar?`
+            },
+            {
+                title: "No soy un príncipe",
+                text: `No soy un príncipe ni vengo vestido de promesas imposibles. No tengo castillos, ni riquezas con las que pueda impresionarte. Solo tengo un corazón que aprendió a amar despacio, unas manos dispuestas a sostenerte y una vida que quisiera compartir contigo.
+
+No prometo que jamás habrá tormentas. Habrá días difíciles, silencios, errores y momentos en los que el mundo parezca demasiado pesado. Pero incluso entonces, quiero ser la persona que permanezca a tu lado.
+
+No busco ofrecerte una historia perfecta, porque las historias perfectas solo existen en los libros. Prefiero escribir contigo una historia verdadera, de esas que tropiezan, que aprenden, que se reconstruyen y aun así eligen seguir caminando juntas.`
+            },
+            {
+                title: "Mi única promesa",
+                text: `Tal vez no sea el hombre que siempre imaginaste. Pero puedo ser quien celebre tus victorias, quien escuche tus miedos, quien cuide de tu corazón como si fuera el lugar más valioso que existe. No quiero que me veas como un héroe. Solo como alguien que cada mañana elige quererte un poco más que el día anterior.
+
+Porque el amor, al menos el que llevo dentro, no se demuestra con promesas enormes... Se demuestra quedándose.
+
+Y si algún día me preguntas qué puedo ofrecerte, no te hablaré de lujos, ni de destinos perfectos. Te ofreceré mi tiempo, mi lealtad, mis abrazos en los días difíciles, mis risas en los buenos, y la tranquilidad de saber que mientras pueda elegir...
+
+Siempre te elegiré a ti.`
+            }
+        ];
+        // ─────────────────────────────────────────────
+
+        /* Petals */
+        const petalWrap = document.getElementById('petals');
+        for (let i = 0; i < 22; i++) {
+            const p = document.createElement('div');
+            p.className = 'petal';
+            const s = 6 + Math.random() * 9;
+            p.style.cssText = `width:${s}px;height:${s}px;background:radial-gradient(circle,#ff69b4,#c2185b);
+    left:${Math.random() * 100}%;
+    animation-duration:${7 + Math.random() * 10}s;
+    animation-delay:${Math.random() * 12}s;`;
+            petalWrap.appendChild(p);
+        }
+
+        /* Build pages */
+        const book = document.getElementById('book');
+        const pageEls = [document.getElementById('cover-page')];
+
+        PAGES.forEach((pg, i) => {
+            const div = document.createElement('div');
+            div.className = 'page';
+            div.style.zIndex = PAGES.length - i;
+            div.innerHTML = `
+    <div class="face front">
+      <div class="page-inner">
+        <div class="page-title">${pg.title}</div>
+        <div class="page-text-wrap" id="wrap-${i}">
+          <div class="page-text" id="pt-${i}" onscroll="checkScroll(${i})">${pg.text.replace(/\n/g, '<br>')}</div>
+          <div class="scroll-hint">&darr; desliza &darr;</div>
+        </div>
+        <div class="page-ornament">✦ ❤ ✦</div>
+      </div>
+      <div class="page-curl"></div>
+    </div>
+    <div class="face back">
+      <div class="page-inner">
+        <div class="page-ornament" style="margin-bottom:10px">❤ ✦ ❤</div>
+      </div>
+    </div>`;
+            div.addEventListener('click', () => currentPage < pageEls.indexOf(div) + 1 ? flipNext() : null);
+            book.appendChild(div);
+            pageEls.push(div);
+        });
+
+        /* Check if a page text overflows and toggle the scroll hint */
+        function checkScroll(i) {
+            const pt = document.getElementById(`pt-${i}`);
+            const wrap = document.getElementById(`wrap-${i}`);
+            if (!pt || !wrap) return;
+            const atBottom = pt.scrollTop + pt.clientHeight >= pt.scrollHeight - 4;
+            wrap.classList.toggle('has-more', !atBottom);
+        }
+
+        /* Run on load so pages that overflow show the hint immediately */
+        function initScrollHints() {
+            PAGES.forEach((_, i) => {
+                const pt = document.getElementById(`pt-${i}`);
+                if (pt && pt.scrollHeight > pt.clientHeight) {
+                    document.getElementById(`wrap-${i}`).classList.add('has-more');
+                }
+            });
+        }
+        setTimeout(initScrollHints, 150);
+
+        let currentPage = 0; // 0 = cover visible
+
+        function updateUI() {
+            const total = pageEls.length - 1;
+            document.getElementById('btn-prev').disabled = currentPage === 0;
+            document.getElementById('btn-next').disabled = currentPage >= total;
+        }
+
+        function setZIndexes() {
+            // Pages not yet flipped sit stacked from bottom (low z) to front (high z).
+            // Pages already flipped go behind everything.
+            pageEls.forEach((el, idx) => {
+                if (idx < currentPage) {
+                    // already flipped — keep low z so they don't cover anything
+                    el.style.zIndex = idx + 1;
+                } else {
+                    // still to be read — higher z for closer to reader, cover shown on top
+                    el.style.zIndex = pageEls.length - idx + 10;
+                }
+            });
+        }
+
+        function flipNext() {
+            if (currentPage >= pageEls.length - 1) return;
+            pageEls[currentPage].classList.add('flipped');
+            currentPage++;
+            setZIndexes();
+            updateUI();
+        }
+
+        function flipPrev() {
+            if (currentPage <= 0) return;
+            currentPage--;
+            // Reorder z-indexes first so the page we're un-flipping
+            // gets a high z-index BEFORE the CSS transition starts
+            setZIndexes();
+            pageEls[currentPage].classList.remove('flipped');
+            updateUI();
+        }
+
+
+        /* Keyboard navigation */
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowRight' || e.key === ' ') flipNext();
+            if (e.key === 'ArrowLeft') flipPrev();
+        });
+
+        updateUI();
+    </script>
+</body>
+
+</html>
