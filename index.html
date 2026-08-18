@@ -856,22 +856,36 @@ Siempre te elegiré a ti.`
             });
         }
 
+        let isAnimating = false;
+
         function flipNext() {
-            if (currentPage >= pageEls.length - 1) return;
-            pageEls[currentPage].classList.add('flipped');
+            if (currentPage >= pageEls.length - 1 || isAnimating) return;
+            isAnimating = true;
+            const el = pageEls[currentPage];
+            el.style.zIndex = 9999; // Pin on top for entire animation
+            el.classList.add('flipped');
             currentPage++;
-            setZIndexes();
             updateUI();
+            el.addEventListener('transitionend', function handler() {
+                el.removeEventListener('transitionend', handler);
+                setZIndexes();
+                isAnimating = false;
+            });
         }
 
         function flipPrev() {
-            if (currentPage <= 0) return;
+            if (currentPage <= 0 || isAnimating) return;
+            isAnimating = true;
             currentPage--;
-            // Reorder z-indexes first so the page we're un-flipping
-            // gets a high z-index BEFORE the CSS transition starts
-            setZIndexes();
-            pageEls[currentPage].classList.remove('flipped');
+            const el = pageEls[currentPage];
+            el.style.zIndex = 9999; // Pin on top for entire animation
+            el.classList.remove('flipped');
             updateUI();
+            el.addEventListener('transitionend', function handler() {
+                el.removeEventListener('transitionend', handler);
+                setZIndexes();
+                isAnimating = false;
+            });
         }
 
 
