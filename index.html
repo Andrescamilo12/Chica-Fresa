@@ -793,7 +793,6 @@ Siempre te elegiré a ti.`
         PAGES.forEach((pg, i) => {
             const div = document.createElement('div');
             div.className = 'page';
-            div.style.zIndex = PAGES.length - i;
             div.innerHTML = `
     <div class="face front">
       <div class="page-inner">
@@ -837,6 +836,7 @@ Siempre te elegiré a ti.`
         setTimeout(initScrollHints, 150);
 
         let currentPage = 0; // 0 = cover visible
+
 
         function updateUI() {
             const total = pageEls.length - 1;
@@ -883,6 +883,8 @@ Siempre te elegiré a ti.`
             if (e.key === 'ArrowLeft') flipPrev();
         });
 
+        // Initialize: cover on top, buttons correct
+        setZIndexes();
         updateUI();
     </script>
 </body>
